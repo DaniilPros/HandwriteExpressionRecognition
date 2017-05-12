@@ -26,5 +26,10 @@ namespace HWRE.UWP
         {
             this.InitializeComponent();
         }
+
+        private void RecognizerControl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

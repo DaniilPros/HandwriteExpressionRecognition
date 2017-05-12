@@ -7,9 +7,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignHeight="300"
-    d:DesignWidth="400">
+    d:DesignWidth="400"
+    Loaded="RecognizerControl_OnLoaded">
 
-    <InkCanvas>
-
-    </InkCanvas>
+    <Grid x:Name="Grid"
+          Background="Blue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <InkCanvas x:Name="InkCanvas" Grid.Row="1" />
+        <Button Content="Recognize" Click="OnRecognizeAsync" Grid.Row="0" HorizontalAlignment="Left"/>
+        <Button Content="Clear" Click="OnClear" Grid.Row="0" HorizontalAlignment="Right"/>
+        <TextBlock x:Name="ResulTextBlock" Grid.Row="0" HorizontalAlignment="Center"/>
+    </Grid>
 </UserControl>

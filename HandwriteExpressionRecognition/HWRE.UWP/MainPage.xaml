@@ -11,10 +11,12 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="10*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <controls:RecognizerControl Grid.Row="1"/>
+        <controls:RecognizerControl Grid.Row="1"
+                                    Width="500"
+                                    Height="500"/>
     </Grid>
 </Page>
 
