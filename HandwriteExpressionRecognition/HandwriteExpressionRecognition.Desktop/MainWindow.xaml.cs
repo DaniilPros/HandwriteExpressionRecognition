@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using Tesseract;
 
 namespace HandwriteExpressionRecognition.Desktop
 {
@@ -23,6 +25,23 @@ namespace HandwriteExpressionRecognition.Desktop
         public MainWindow()
         {
             InitializeComponent();
+
+
+        }
+
+        private void LoadButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new OpenFileDialog();
+            var showDialog = fileDialog.ShowDialog();
+            if (showDialog != null && showDialog.Value)
+            {
+                //@"D:\HandwriteExpressionRecognition\HandwriteExpressionRecognition\HandwriteExpressionRecognition.Desktop\TestData\123456789.bmp"
+                var tessEngine = new Tesseract.TesseractEngine("tessdata", "eng", EngineMode.Default);
+                var page = tessEngine.Process(
+                    Pix.LoadFromFile(fileDialog.FileName),
+                    PageSegMode.Auto);
+                TextBlock.Text = page.GetText();
+            }
         }
     }
 }
