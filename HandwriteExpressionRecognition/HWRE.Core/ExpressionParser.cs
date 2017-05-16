@@ -1,28 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace HWRE.Core
 {
     class ExpressionParser
     {
         private  string _expression;
-        //private string PolishNotation;
-        private int _value;
-        private Dictionary<char,int> _priority = new Dictionary<char, int>()
-        {
-            {')',0},
-            {')',0}
-        };
+        private double _value;
 
         public ExpressionParser(string str = "")
         {
             _expression = str;
             _expression = _expression.Replace(" ", string.Empty);
-            Console.WriteLine(_expression);
-            if (Validation())
-                _value = CalculateExpression(MakePolishNotation(_expression));
-            else
-                Console.WriteLine("Error in expression!!!");
+            Debug.WriteLine(_expression);
         }
 
         private bool Validation()
@@ -62,28 +53,20 @@ namespace HWRE.Core
             }
         }
 
-        private int StringToInt(string str)
-        {
-            int Result = 0;
-            for (int i = 0; i < str.Length; i++)
-                Result += (str[i] - '0') * (int)Math.Pow(10, str.Length - 1 - i);
-            return Result;
-        }
-
         private List<string> MakePolishNotation(string str)
         {
-            List<string> OutStr = new List<string>();
-            Stack<char> OperatorsStack = new Stack<char>();
+            List<string> outStr = new List<string>();
+            Stack<char> operatorsStack = new Stack<char>();
             for (int i = 0; i < str.Length; i++)
             {
                 char ch = str[i];
                 if (ch == '(')
-                    OperatorsStack.Push(ch);
+                    operatorsStack.Push(ch);
                 else if (ch == ')')
                 {
-                    while (OperatorsStack.Peek() != '(')
-                        OutStr.Add(OperatorsStack.Pop().ToString());
-                    OperatorsStack.Pop();
+                    while (operatorsStack.Peek() != '(')
+                        outStr.Add(operatorsStack.Pop().ToString());
+                    operatorsStack.Pop();
                 }
                 else if (ch <= '9' && ch >= '0')
                 {
@@ -96,70 +79,78 @@ namespace HWRE.Core
                             break;
                     }
                     i--;
-                    OutStr.Add(num);
+                    outStr.Add(num);
                 }
                 else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^')
                 {
-                    if (OperatorsStack.Count == 0)
-                        OperatorsStack.Push(ch);
+                    if (operatorsStack.Count == 0)
+                        operatorsStack.Push(ch);
                     else
                     {
-                        if (GetPriority(OperatorsStack.Peek()) < GetPriority(ch))
-                            OperatorsStack.Push(ch);
+                        if (GetPriority(operatorsStack.Peek()) < GetPriority(ch))
+                            operatorsStack.Push(ch);
                         else
                         {
-                            while (OperatorsStack.Count != 0 && GetPriority(OperatorsStack.Peek()) >= GetPriority(ch))
-                                OutStr.Add(OperatorsStack.Pop().ToString());
-                            OperatorsStack.Push(ch);
+                            while (operatorsStack.Count != 0 && GetPriority(operatorsStack.Peek()) >= GetPriority(ch))
+                                outStr.Add(operatorsStack.Pop().ToString());
+                            operatorsStack.Push(ch);
                         }
                     }
                 }
             }
-            while (OperatorsStack.Count != 0)
-                OutStr.Add(OperatorsStack.Pop().ToString());
-            return OutStr;
+            while (operatorsStack.Count != 0)
+                outStr.Add(operatorsStack.Pop().ToString());
+            return outStr;
         }
 
-        private int CalculateExpression(List<string> str)
+        private double CalculateExpression(List<string> str)
         {
-            int Result = 0;
-            Stack<int> OperandsStack = new Stack<int>();
-            foreach (string Element in str)
+            Stack<double> operandsStack = new Stack<double>();
+            foreach (string element in str)
             {
-                if (Element == "+")
+                double firstOperand, secondOperand;
+                if (element == "+")
                 {
-                    int FirstOperand = OperandsStack.Pop();
-                    int SecondOperand = OperandsStack.Pop();
-                    OperandsStack.Push(FirstOperand + SecondOperand);
+                    firstOperand = operandsStack.Pop();
+                    secondOperand = operandsStack.Pop();
+                    operandsStack.Push(firstOperand + secondOperand);
                 }
-                else if (Element == "-")
+                else if (element == "-")
                 {
-                    int FirstOperand = OperandsStack.Pop();
-                    int SecondOperand = OperandsStack.Pop();
-                    OperandsStack.Push(SecondOperand - FirstOperand);
+                    firstOperand = operandsStack.Pop();
+                    secondOperand = operandsStack.Pop();
+                    operandsStack.Push(secondOperand - firstOperand);
                 }
-                else if (Element == "*")
+                else if (element == "*")
                 {
-                    int FirstOperand = OperandsStack.Pop();
-                    int SecondOperand = OperandsStack.Pop();
-                    OperandsStack.Push(FirstOperand * SecondOperand);
+                    firstOperand = operandsStack.Pop();
+                    secondOperand = operandsStack.Pop();
+                    operandsStack.Push(firstOperand * secondOperand);
                 }
-                else if (Element == "/")
+                else if (element == "/")
                 {
-                    int FirstOperand = OperandsStack.Pop();
-                    int SecondOperand = OperandsStack.Pop();
-                    OperandsStack.Push(SecondOperand / FirstOperand);
+                    firstOperand = operandsStack.Pop();
+                    secondOperand = operandsStack.Pop();
+                    operandsStack.Push(secondOperand / firstOperand);
+                }
+                else if (element == "^")
+                {
+                    firstOperand = operandsStack.Pop();
+                    secondOperand = operandsStack.Pop();
+                    operandsStack.Push((int)Math.Pow(secondOperand, firstOperand));
                 }
                 else
-                    OperandsStack.Push(StringToInt(Element));
+                    operandsStack.Push(int.Parse(element));
             }
-            Result = OperandsStack.Pop();
-            return Result;
+            var result = operandsStack.Pop();
+            return result;
         }
 
-        public int GetExpressionValue()
+        public string GetExpressionValue()
         {
-            return _value;
+            if (!Validation()) return "Error in expression";
+            _value = CalculateExpression(MakePolishNotation(_expression));
+            return _value.ToString();
         }
 
     }

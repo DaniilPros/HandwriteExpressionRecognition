@@ -7,18 +7,20 @@ namespace program
     class ExpressionParser
     {
         private string Expression;
-        //private string PolishNotation;
-        int Value;
+        public int Value;
+        private bool IsCorrect;
 
         public ExpressionParser(string str = "")
         {
             Expression = str;
             Expression = Expression.Replace(" ", string.Empty);
             Console.WriteLine(Expression);
-            if (Validation())
-                Value = CalculateExpression(MakePolishNotation(Expression));
-            else
-                Console.WriteLine("Error in expression!!!");
+            IsCorrect = Validation();
+        }
+
+        public void SetExpression(string Expression)
+        {
+            this.Expression = Expression;
         }
 
         private bool Validation()
@@ -56,14 +58,6 @@ namespace program
                 case '^': return 4;
                 default: return -1;
             }
-        }
-
-        private int StringToInt(string str)
-        {
-            int Result = 0;
-            for (int i = 0; i < str.Length; i++)
-                Result += (str[i] - '0') * (int)Math.Pow(10, str.Length - 1 - i);
-            return Result;
         }
 
         private List<string> MakePolishNotation(string str)
@@ -116,9 +110,10 @@ namespace program
             return OutStr;
         }
 
-        private int CalculateExpression(List<string> str)
+        private string CalculateExpression()
         {
             int Result = 0;
+            List<string> str = MakePolishNotation(Expression);
             Stack<int> OperandsStack = new Stack<int>();
             foreach (string Element in str)
             {
@@ -146,17 +141,24 @@ namespace program
                     int SecondOperand = OperandsStack.Pop();
                     OperandsStack.Push(SecondOperand / FirstOperand);
                 }
+                else if (Element == "^")
+                {
+                    int FirstOperand = OperandsStack.Pop();
+                    int SecondOperand = OperandsStack.Pop();
+                    OperandsStack.Push(Math.Pow((double)SecondOperand, (double)FirstOperand));
+                }
                 else
-                    OperandsStack.Push(StringToInt(Element));
+                    OperandsStack.Push(Int32.Parse(Element));
             }
             Result = OperandsStack.Pop();
             return Result;
         }
 
-        public int GetExpressionValue()
+        void GetValue()
         {
-            return Value;
+                    if (Validation())
+                        return CalculateExpression().ToString();
+                    else return "Error in expression";
         }
-
     }
 }
