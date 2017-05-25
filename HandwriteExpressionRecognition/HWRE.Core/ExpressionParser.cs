@@ -4,10 +4,28 @@ using System.Diagnostics;
 
 namespace HWRE.Core
 {
+    class Node
+    {
+        public string Val { get; set; }
+        public Node LeftNode { get; set; }
+        public Node RightNode { get; set; }
+        public Node NextNode { get; set; }
+    }
+
     class ExpressionParser
     {
-        private  string _expression;
-        private double _value;
+        private string _expression { get; public set; }
+        public string TreeValue { get; set; }
+        public string Value {
+            get
+            {
+                if (Validation())
+                    return CalculateExpression();
+                else
+                    return "Wrong expression!";
+            } }
+
+        private Node _root = new Node();
 
         public ExpressionParser(string str = "")
         {
@@ -16,19 +34,24 @@ namespace HWRE.Core
             Debug.WriteLine(_expression);
         }
 
+        public void SetExpression(string expression)
+        {
+            this._expression = expression;
+        }
+
         private bool Validation()
         {
             int openBracketCount = 0, closeBracketCount = 0;
-            var isOperandPrevious = false;
-            foreach (var t in _expression)
+            bool isOperandPrevious = false;
+            for (int i = 0; i < _expression.Length; i++)
             {
-                if (t == '(')
+                if (_expression[i] == '(')
                     openBracketCount++;
-                if (t == ')')
+                if (_expression[i] == ')')
                     closeBracketCount++;
-                if (isOperandPrevious && GetPriority(t) > 1)
+                if (isOperandPrevious && GetPriority(_expression[i]) > 1)
                     return false;
-                else if (GetPriority(t) > 1)
+                else if (GetPriority(_expression[i]) > 1)
                     isOperandPrevious = true;
                 else
                     isOperandPrevious = false;
@@ -103,55 +126,122 @@ namespace HWRE.Core
             return outStr;
         }
 
-        private double CalculateExpression(List<string> str)
+        private string CalculateExpression()
         {
+            double result = 0;
+            List<string> str = MakePolishNotation(_expression);
             Stack<double> operandsStack = new Stack<double>();
             foreach (string element in str)
             {
-                double firstOperand, secondOperand;
                 if (element == "+")
                 {
-                    firstOperand = operandsStack.Pop();
-                    secondOperand = operandsStack.Pop();
+                    double firstOperand = operandsStack.Pop();
+                    double secondOperand = operandsStack.Pop();
                     operandsStack.Push(firstOperand + secondOperand);
                 }
                 else if (element == "-")
                 {
-                    firstOperand = operandsStack.Pop();
-                    secondOperand = operandsStack.Pop();
+                    double firstOperand = operandsStack.Pop();
+                    double secondOperand = operandsStack.Pop();
                     operandsStack.Push(secondOperand - firstOperand);
                 }
                 else if (element == "*")
                 {
-                    firstOperand = operandsStack.Pop();
-                    secondOperand = operandsStack.Pop();
+                    double firstOperand = operandsStack.Pop();
+                    double secondOperand = operandsStack.Pop();
                     operandsStack.Push(firstOperand * secondOperand);
                 }
                 else if (element == "/")
                 {
-                    firstOperand = operandsStack.Pop();
-                    secondOperand = operandsStack.Pop();
+                    double firstOperand = operandsStack.Pop();
+                    double secondOperand = operandsStack.Pop();
                     operandsStack.Push(secondOperand / firstOperand);
                 }
                 else if (element == "^")
                 {
-                    firstOperand = operandsStack.Pop();
-                    secondOperand = operandsStack.Pop();
-                    operandsStack.Push((int)Math.Pow(secondOperand, firstOperand));
+                    double firstOperand = operandsStack.Pop();
+                    double secondOperand = operandsStack.Pop();
+                    operandsStack.Push(Math.Pow((double)secondOperand, (double)firstOperand));
                 }
                 else
-                    operandsStack.Push(int.Parse(element));
+                    operandsStack.Push(Int32.Parse(element));
             }
-            var result = operandsStack.Pop();
-            return result;
+            result = operandsStack.Pop();
+            return result.ToString();
         }
 
-        public string GetExpressionValue()
+        public string CalculateTree(Node n)
         {
-            if (!Validation()) return "Error in expression";
-            _value = CalculateExpression(MakePolishNotation(_expression));
-            return _value.ToString();
+            if (n.Val == "+")
+                return (Int32.Parse(CalculateTree(n.LeftNode)) + Int32.Parse(CalculateTree(n.RightNode))).ToString();
+            else if (n.Val == "-")
+                return (Int32.Parse(CalculateTree(n.LeftNode)) - Int32.Parse(CalculateTree(n.RightNode))).ToString();
+            else if (n.Val == "*")
+                return (Int32.Parse(CalculateTree(n.LeftNode)) * Int32.Parse(CalculateTree(n.RightNode))).ToString();
+            else if (n.Val == "+")
+                return (Int32.Parse(CalculateTree(n.LeftNode)) / Int32.Parse(CalculateTree(n.RightNode))).ToString();
+            else if (n.Val == "^")
+                return ;
+            else
+                return n.Val;
         }
 
+
+        public void TreeByPass(Node n)
+        {
+            if (n == null)
+                return;
+            TreeByPass(n.LeftNode);
+            TreeByPass(n.RightNode);
+        }
+
+        public string MakeTree()
+        {
+            var treeargument = MakePolishNotation(_expression);
+            int cnt = 0;Stack<Node> st = new Stack<Node>();
+            st.Push(null);
+            while (cnt < treeargument.Count)
+            {
+                var p = new Node {Val = treeargument[cnt].ToString()};
+                if (p.Val == "+" || p.Val == "-" || p.Val == "*" || p.Val == "/" || p.Val == "^")
+                {
+                    p.RightNode = st.Pop();
+                    p.LeftNode = st.Pop();
+                    st.Push(p);
+                }
+                else
+                {
+                    p.LeftNode = null;
+                    p.RightNode = null;
+                    st.Push(p);
+                }
+                cnt++;
+            }
+            _root = st.Peek();
+            TreeByPass(_root);
+            return CalculateTree(_root);
+        }
+
+        private void AddNode(Node n)
+        {
+            var el = n.Val;
+            if (el == "(")
+            {
+                var node = new Node();
+                AddNode(node.LeftNode);
+                node.Val = node.Val;
+                AddNode(node.RightNode);
+                el = n.Val;
+            }
+            else
+            {
+                var node = new Node
+                {
+                    Val = el,
+                    LeftNode = null,
+                    RightNode = null
+                };
+            }
+        }
     }
 }
