@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Globalization;
@@ -28,6 +29,7 @@ namespace HWRE.UWP.Controls
         private readonly IReadOnlyList<InkRecognizer> _recoView = null;
         private Language _previousInputLanguage = null;
         private readonly CoreTextServicesManager _textServiceManager = null;
+        private DispatcherTimer _recoTimer;
         public RecognizerControl()
         {
             this.InitializeComponent();
@@ -54,20 +56,50 @@ namespace HWRE.UWP.Controls
             // Initialize the InkCanvas
             InkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
             InkCanvas.InkPresenter.InputDeviceTypes = Windows.UI.Core.CoreInputDeviceTypes.Mouse | Windows.UI.Core.CoreInputDeviceTypes.Pen | Windows.UI.Core.CoreInputDeviceTypes.Touch;
+            InkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
+            InkCanvas.InkPresenter.StrokeInput.StrokeEnded += StrokeInput_StrokeEnded; 
+
+            _recoTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(2) };
+            _recoTimer.Tick += _recoTimer_Tick;
+        }
+
+        private void StrokeInput_StrokeEnded(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
+        {
+           // _recoTimer.Stop();
+        }
+
+        private void StrokeInput_StrokeStarted(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
+        {
+            _recoTimer.Start();
+        }
+
+        private async void _recoTimer_Tick(object sender, object e)
+        {
+            _recoTimer.Stop();
+            await RecognizeAsync();
+            _recoTimer.Start();
         }
 
         async void OnRecognizeAsync(object sender, RoutedEventArgs e)
         {
+            await RecognizeAsync();
+        }
+
+        private async Task RecognizeAsync()
+        {
             var currentStrokes = InkCanvas.InkPresenter.StrokeContainer.GetStrokes();
             if (currentStrokes.Count > 0)
             {
-                var recognitionResults = await _inkRecognizerContainer.RecognizeAsync(InkCanvas.InkPresenter.StrokeContainer, InkRecognitionTarget.All);
+                var recognitionResults =
+                    await _inkRecognizerContainer.RecognizeAsync(InkCanvas.InkPresenter.StrokeContainer,
+                        InkRecognitionTarget.All);
                 var str = string.Empty;
                 if (recognitionResults.Count > 0)
                 {
                     try
                     {
-                        str = recognitionResults.Aggregate(string.Empty, (current, r) => current + (" " + r.GetTextCandidates()[0]));
+                        str = recognitionResults.Aggregate(string.Empty,
+                            (current, r) => current + (" " + r.GetTextCandidates()[0]));
                         var expressionParser = new ExpressionParser(str);
                         ResulTextBlock.Text = expressionParser.Value;
                     }
@@ -75,17 +107,13 @@ namespace HWRE.UWP.Controls
                     {
                         ResulTextBlock.Text = "Error in " + str;
                     }
-
-
                 }
                 else
                 {
-
                 }
             }
             else
             {
-
             }
         }
 

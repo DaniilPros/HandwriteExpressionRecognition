@@ -16,16 +16,31 @@
             <RowDefinition Height="50"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Border  Grid.Row="1"
-                 BorderThickness="3"
+        <Grid Grid.Row="1">
+            <Border  BorderThickness="3"
                  BorderBrush="White"
                  Height="106">
-            <InkCanvas x:Name="InkCanvas"
+                <InkCanvas x:Name="InkCanvas"
                        Height="100"/>
-        </Border>
 
-        <Button Content="Recognize" Click="OnRecognizeAsync" Grid.Row="0" HorizontalAlignment="Left"/>
-        <Button Content="Clear" Click="OnClear" Grid.Row="0" HorizontalAlignment="Right"/>
+            </Border>
+        </Grid>
+        <StackPanel Grid.Row="0"
+                    FlowDirection="LeftToRight"
+                    Orientation="Horizontal">
+            <InkToolbar x:Name="InkToolbar"
+                    VerticalAlignment="Top"
+                    TargetInkCanvas="{x:Bind InkCanvas}" 
+                        InitialControls="None"
+            >
+                <InkToolbarEraserButton/>
+                <InkToolbarBallpointPenButton />
+            </InkToolbar>
+
+            <Button Content="Recognize" Click="OnRecognizeAsync"  HorizontalAlignment="Left"/>
+            <Button Content="Clear" Click="OnClear"  HorizontalAlignment="Right"/>
+        </StackPanel>
+
         <TextBlock x:Name="ResulTextBlock" Grid.Row="0" HorizontalAlignment="Center"/>
     </Grid>
 </UserControl>
