@@ -140,6 +140,12 @@
       <Version>5.2.3</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HWRE.Core\HWRE.Core.csproj">
+      <Project>{cf68ff4c-2024-4d9c-87a5-d442049e1b15}</Project>
+      <Name>HWRE.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

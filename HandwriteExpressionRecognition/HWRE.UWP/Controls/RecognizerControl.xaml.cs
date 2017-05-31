@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using HWRE.Core;
 using HWRE.UWP.Helpers;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
@@ -61,12 +62,21 @@ namespace HWRE.UWP.Controls
             if (currentStrokes.Count > 0)
             {
                 var recognitionResults = await _inkRecognizerContainer.RecognizeAsync(InkCanvas.InkPresenter.StrokeContainer, InkRecognitionTarget.All);
-
+                var str = string.Empty;
                 if (recognitionResults.Count > 0)
                 {
-                    // Display recognition result
-                    var str = recognitionResults.Aggregate("Recognition result:", (current, r) => current + (" " + r.GetTextCandidates()[0]));
-                    ResulTextBlock.Text = str;
+                    try
+                    {
+                        str = recognitionResults.Aggregate(string.Empty, (current, r) => current + (" " + r.GetTextCandidates()[0]));
+                        var expressionParser = new ExpressionParser(str);
+                        ResulTextBlock.Text = expressionParser.Value;
+                    }
+                    catch (Exception exception)
+                    {
+                        ResulTextBlock.Text = "Error in " + str;
+                    }
+
+
                 }
                 else
                 {

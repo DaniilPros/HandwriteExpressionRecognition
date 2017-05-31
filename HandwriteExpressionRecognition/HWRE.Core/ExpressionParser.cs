@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace HWRE.Core
 {
-    class Node
+    public class Node
     {
         public string Val { get; set; }
         public Node LeftNode { get; set; }
@@ -12,53 +12,53 @@ namespace HWRE.Core
         public Node NextNode { get; set; }
     }
 
-    class ExpressionParser
+    public class ExpressionParser
     {
-        private string _expression { get; public set; }
+        public string Expression { get; set; }
         public string TreeValue { get; set; }
-        public string Value {
+        public string Value
+        {
             get
             {
                 if (Validation())
                     return CalculateExpression();
                 else
                     return "Wrong expression!";
-            } }
+            }
+        }
 
         private Node _root = new Node();
 
         public ExpressionParser(string str = "")
         {
-            _expression = str;
-            _expression = _expression.Replace(" ", string.Empty);
-            Debug.WriteLine(_expression);
+            Expression = str;
+            Expression = Expression.Replace(" ", string.Empty);
+            Debug.WriteLine(Expression);
         }
 
         public void SetExpression(string expression)
         {
-            this._expression = expression;
+            this.Expression = expression;
         }
 
         private bool Validation()
         {
             int openBracketCount = 0, closeBracketCount = 0;
             bool isOperandPrevious = false;
-            for (int i = 0; i < _expression.Length; i++)
+            foreach (char ch in Expression)
             {
-                if (_expression[i] == '(')
+                if (ch == '(')
                     openBracketCount++;
-                if (_expression[i] == ')')
+                if (ch == ')')
                     closeBracketCount++;
-                if (isOperandPrevious && GetPriority(_expression[i]) > 1)
+                if (isOperandPrevious && GetPriority(ch) > 1)
                     return false;
-                else if (GetPriority(_expression[i]) > 1)
+                else if (GetPriority(ch) > 1)
                     isOperandPrevious = true;
                 else
                     isOperandPrevious = false;
             }
-            if (openBracketCount != closeBracketCount)
-                return false;
-            return true;
+            return openBracketCount == closeBracketCount;
         }
 
         private int GetPriority(char ch)
@@ -129,7 +129,7 @@ namespace HWRE.Core
         private string CalculateExpression()
         {
             double result = 0;
-            List<string> str = MakePolishNotation(_expression);
+            List<string> str = MakePolishNotation(Expression);
             Stack<double> operandsStack = new Stack<double>();
             foreach (string element in str)
             {
@@ -181,7 +181,7 @@ namespace HWRE.Core
             else if (n.Val == "+")
                 return (Int32.Parse(CalculateTree(n.LeftNode)) / Int32.Parse(CalculateTree(n.RightNode))).ToString();
             else if (n.Val == "^")
-                return ;
+                return string.Empty;
             else
                 return n.Val;
         }
@@ -197,12 +197,12 @@ namespace HWRE.Core
 
         public string MakeTree()
         {
-            var treeargument = MakePolishNotation(_expression);
-            int cnt = 0;Stack<Node> st = new Stack<Node>();
+            var treeargument = MakePolishNotation(Expression);
+            int cnt = 0; Stack<Node> st = new Stack<Node>();
             st.Push(null);
             while (cnt < treeargument.Count)
             {
-                var p = new Node {Val = treeargument[cnt].ToString()};
+                var p = new Node { Val = treeargument[cnt].ToString() };
                 if (p.Val == "+" || p.Val == "-" || p.Val == "*" || p.Val == "/" || p.Val == "^")
                 {
                     p.RightNode = st.Pop();

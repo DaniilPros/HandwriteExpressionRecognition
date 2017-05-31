@@ -15,8 +15,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <controls:RecognizerControl Grid.Row="1"
-                                    Width="500"
-                                    Height="500"/>
+                                    Width="1000"
+                                    Height="200"/>
     </Grid>
 </Page>
 

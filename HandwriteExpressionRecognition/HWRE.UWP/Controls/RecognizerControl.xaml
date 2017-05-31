@@ -11,12 +11,19 @@
     Loaded="RecognizerControl_OnLoaded">
 
     <Grid x:Name="Grid"
-          Background="Blue">
+          Background="Black">
         <Grid.RowDefinitions>
-            <RowDefinition Height="100"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <InkCanvas x:Name="InkCanvas" Grid.Row="1" />
+        <Border  Grid.Row="1"
+                 BorderThickness="3"
+                 BorderBrush="White"
+                 Height="106">
+            <InkCanvas x:Name="InkCanvas"
+                       Height="100"/>
+        </Border>
+
         <Button Content="Recognize" Click="OnRecognizeAsync" Grid.Row="0" HorizontalAlignment="Left"/>
         <Button Content="Clear" Click="OnClear" Grid.Row="0" HorizontalAlignment="Right"/>
         <TextBlock x:Name="ResulTextBlock" Grid.Row="0" HorizontalAlignment="Center"/>
