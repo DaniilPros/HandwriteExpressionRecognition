@@ -69,7 +69,9 @@ namespace HWRE.Core
                 case ')': return 1;
                 case '+': return 2;
                 case '-': return 2;
+                case '÷': return 3;
                 case '*': return 3;
+                case '×': return 3;
                 case '/': return 3;
                 case '^': return 4;
                 default: return -1;
@@ -94,7 +96,7 @@ namespace HWRE.Core
                 else if (ch <= '9' && ch >= '0')
                 {
                     string num = "";
-                    while (str[i] <= '9' && str[i] >= '0')
+                    while ((str[i] <= '9' && str[i] >= '0') || str[i]=='.')
                     {
                         num += str[i];
                         i++;
@@ -104,7 +106,7 @@ namespace HWRE.Core
                     i--;
                     outStr.Add(num);
                 }
-                else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^')
+                else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '÷' || ch == '×' || ch == '^')
                 {
                     if (operatorsStack.Count == 0)
                         operatorsStack.Push(ch);
@@ -145,13 +147,13 @@ namespace HWRE.Core
                     double secondOperand = operandsStack.Pop();
                     operandsStack.Push(secondOperand - firstOperand);
                 }
-                else if (element == "*")
+                else if (element == "*"|| element == "×")
                 {
                     double firstOperand = operandsStack.Pop();
                     double secondOperand = operandsStack.Pop();
                     operandsStack.Push(firstOperand * secondOperand);
                 }
-                else if (element == "/")
+                else if (element == "/"|| element == "÷")
                 {
                     double firstOperand = operandsStack.Pop();
                     double secondOperand = operandsStack.Pop();
@@ -176,9 +178,9 @@ namespace HWRE.Core
                 return (Int32.Parse(CalculateTree(n.LeftNode)) + Int32.Parse(CalculateTree(n.RightNode))).ToString();
             else if (n.Val == "-")
                 return (Int32.Parse(CalculateTree(n.LeftNode)) - Int32.Parse(CalculateTree(n.RightNode))).ToString();
-            else if (n.Val == "*")
+            else if (n.Val == "*"|| n.Val == "×")
                 return (Int32.Parse(CalculateTree(n.LeftNode)) * Int32.Parse(CalculateTree(n.RightNode))).ToString();
-            else if (n.Val == "+")
+            else if (n.Val == "/"|| n.Val == "÷")
                 return (Int32.Parse(CalculateTree(n.LeftNode)) / Int32.Parse(CalculateTree(n.RightNode))).ToString();
             else if (n.Val == "^")
                 return string.Empty;
@@ -203,7 +205,7 @@ namespace HWRE.Core
             while (cnt < treeargument.Count)
             {
                 var p = new Node { Val = treeargument[cnt].ToString() };
-                if (p.Val == "+" || p.Val == "-" || p.Val == "*" || p.Val == "/" || p.Val == "^")
+                if (p.Val == "+" || p.Val == "-" || p.Val == "*" || p.Val == "/" || p.Val == "×" || p.Val == "÷" || p.Val == "^")
                 {
                     p.RightNode = st.Pop();
                     p.LeftNode = st.Pop();
